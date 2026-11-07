@@ -1,0 +1,159 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1128" height="790" viewBox="0 0 1128 790">
+<rect width="1128" height="790" fill="#151922"/>
+<g font-family="DejaVu Sans, sans-serif">
+<text x="36" y="48" fill="#ecf0f8" font-size="27" font-weight="600">Monitor arrangement — icon options</text>
+<text x="36" y="78" fill="#9ca8bd" font-size="14">Original SVG concepts · large preview and actual menu-size comparison</text>
+<g transform="translate(36,110)">
+<rect width="328" height="298" rx="12" fill="#202633" stroke="#343d50"/>
+<text x="22" y="33" fill="#c6d8fa" font-size="15" font-weight="600">A</text>
+<text x="46" y="33" fill="#ecf0f8" font-size="15" font-weight="600">Offset displays</text>
+<g transform="translate(28,62) scale(4)" color="#bdd0f2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+  <rect x="2" y="4" width="11" height="8" rx="1"/>
+  <path d="M7.5 12v3M5 15h5"/>
+  <rect x="13" y="10" width="9" height="7" rx="1"/>
+  <path d="M17.5 17v3M15 20h5"/>
+</g>
+<rect x="184" y="75" width="104" height="72" rx="8" fill="#edf1f7"/>
+<g transform="translate(220,95) scale(1.33)" color="#354761" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+  <rect x="2" y="4" width="11" height="8" rx="1"/>
+  <path d="M7.5 12v3M5 15h5"/>
+  <rect x="13" y="10" width="9" height="7" rx="1"/>
+  <path d="M17.5 17v3M15 20h5"/>
+</g>
+<path d="M22 188h284" stroke="#343d50"/>
+<g transform="translate(25,210) scale(.8333)" color="#d8e1ef" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+  <rect x="2" y="4" width="11" height="8" rx="1"/>
+  <path d="M7.5 12v3M5 15h5"/>
+  <rect x="13" y="10" width="9" height="7" rx="1"/>
+  <path d="M17.5 17v3M15 20h5"/>
+</g>
+<text x="59" y="225" fill="#d8e1ef" font-size="14">Monitor Arrangement</text>
+<text x="22" y="270" fill="#9ca8bd" font-size="12">Emphasizes relative screen positions</text>
+</g>
+<g transform="translate(400,110)">
+<rect width="328" height="298" rx="12" fill="#202633" stroke="#343d50"/>
+<text x="22" y="33" fill="#c6d8fa" font-size="15" font-weight="600">B</text>
+<text x="46" y="33" fill="#ecf0f8" font-size="15" font-weight="600">Screen layout</text>
+<g transform="translate(28,62) scale(4)" color="#bdd0f2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+  <rect x="2" y="6" width="8" height="7" rx=".7"/>
+  <rect x="11" y="3" width="5" height="13" rx=".7"/>
+  <rect x="17" y="10" width="5" height="6" rx=".7"/>
+  <path d="M4 19h16M4 17v4M20 17v4"/>
+</g>
+<rect x="184" y="75" width="104" height="72" rx="8" fill="#edf1f7"/>
+<g transform="translate(220,95) scale(1.33)" color="#354761" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+  <rect x="2" y="6" width="8" height="7" rx=".7"/>
+  <rect x="11" y="3" width="5" height="13" rx=".7"/>
+  <rect x="17" y="10" width="5" height="6" rx=".7"/>
+  <path d="M4 19h16M4 17v4M20 17v4"/>
+</g>
+<path d="M22 188h284" stroke="#343d50"/>
+<g transform="translate(25,210) scale(.8333)" color="#d8e1ef" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+  <rect x="2" y="6" width="8" height="7" rx=".7"/>
+  <rect x="11" y="3" width="5" height="13" rx=".7"/>
+  <rect x="17" y="10" width="5" height="6" rx=".7"/>
+  <path d="M4 19h16M4 17v4M20 17v4"/>
+</g>
+<text x="59" y="225" fill="#d8e1ef" font-size="14">Monitor Arrangement</text>
+<text x="22" y="270" fill="#9ca8bd" font-size="12">Closest to the arrangement editor</text>
+</g>
+<g transform="translate(764,110)">
+<rect width="328" height="298" rx="12" fill="#202633" stroke="#343d50"/>
+<text x="22" y="33" fill="#c6d8fa" font-size="15" font-weight="600">C</text>
+<text x="46" y="33" fill="#ecf0f8" font-size="15" font-weight="600">Move display</text>
+<g transform="translate(28,62) scale(4)" color="#bdd0f2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+  <rect x="3" y="5" width="15" height="11" rx="1"/>
+  <path d="M10.5 16v4M7 20h7"/>
+  <path d="M8 10h12M17 7l3 3-3 3M11 7l-3 3 3 3"/>
+</g>
+<rect x="184" y="75" width="104" height="72" rx="8" fill="#edf1f7"/>
+<g transform="translate(220,95) scale(1.33)" color="#354761" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+  <rect x="3" y="5" width="15" height="11" rx="1"/>
+  <path d="M10.5 16v4M7 20h7"/>
+  <path d="M8 10h12M17 7l3 3-3 3M11 7l-3 3 3 3"/>
+</g>
+<path d="M22 188h284" stroke="#343d50"/>
+<g transform="translate(25,210) scale(.8333)" color="#d8e1ef" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+  <rect x="3" y="5" width="15" height="11" rx="1"/>
+  <path d="M10.5 16v4M7 20h7"/>
+  <path d="M8 10h12M17 7l3 3-3 3M11 7l-3 3 3 3"/>
+</g>
+<text x="59" y="225" fill="#d8e1ef" font-size="14">Monitor Arrangement</text>
+<text x="22" y="270" fill="#9ca8bd" font-size="12">Emphasizes moving screens</text>
+</g>
+<g transform="translate(36,432)">
+<rect width="328" height="298" rx="12" fill="#202633" stroke="#343d50"/>
+<text x="22" y="33" fill="#c6d8fa" font-size="15" font-weight="600">D</text>
+<text x="46" y="33" fill="#ecf0f8" font-size="15" font-weight="600">Arrange panels</text>
+<g transform="translate(28,62) scale(4)" color="#bdd0f2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke-dasharray="1 3" d="M2 2h20v20H2z"/>
+  <rect x="5" y="6" width="8" height="6" rx=".5"/>
+  <rect x="14" y="12" width="5" height="7" rx=".5"/>
+</g>
+<rect x="184" y="75" width="104" height="72" rx="8" fill="#edf1f7"/>
+<g transform="translate(220,95) scale(1.33)" color="#354761" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke-dasharray="1 3" d="M2 2h20v20H2z"/>
+  <rect x="5" y="6" width="8" height="6" rx=".5"/>
+  <rect x="14" y="12" width="5" height="7" rx=".5"/>
+</g>
+<path d="M22 188h284" stroke="#343d50"/>
+<g transform="translate(25,210) scale(.8333)" color="#d8e1ef" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke-dasharray="1 3" d="M2 2h20v20H2z"/>
+  <rect x="5" y="6" width="8" height="6" rx=".5"/>
+  <rect x="14" y="12" width="5" height="7" rx=".5"/>
+</g>
+<text x="59" y="225" fill="#d8e1ef" font-size="14">Monitor Arrangement</text>
+<text x="22" y="270" fill="#9ca8bd" font-size="12">Abstract, compact layout symbol</text>
+</g>
+<g transform="translate(400,432)">
+<rect width="328" height="298" rx="12" fill="#202633" stroke="#343d50"/>
+<text x="22" y="33" fill="#c6d8fa" font-size="15" font-weight="600">E</text>
+<text x="46" y="33" fill="#ecf0f8" font-size="15" font-weight="600">Desktop + laptop</text>
+<g transform="translate(28,62) scale(4)" color="#bdd0f2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+  <rect x="2" y="3" width="13" height="10" rx="1"/>
+  <path d="M8.5 13v4M5.5 17h4"/>
+  <rect x="13" y="12" width="8" height="6" rx=".7"/>
+  <path d="M11 20h12l-2-2h-8l-2 2Z"/>
+</g>
+<rect x="184" y="75" width="104" height="72" rx="8" fill="#edf1f7"/>
+<g transform="translate(220,95) scale(1.33)" color="#354761" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+  <rect x="2" y="3" width="13" height="10" rx="1"/>
+  <path d="M8.5 13v4M5.5 17h4"/>
+  <rect x="13" y="12" width="8" height="6" rx=".7"/>
+  <path d="M11 20h12l-2-2h-8l-2 2Z"/>
+</g>
+<path d="M22 188h284" stroke="#343d50"/>
+<g transform="translate(25,210) scale(.8333)" color="#d8e1ef" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+  <rect x="2" y="3" width="13" height="10" rx="1"/>
+  <path d="M8.5 13v4M5.5 17h4"/>
+  <rect x="13" y="12" width="8" height="6" rx=".7"/>
+  <path d="M11 20h12l-2-2h-8l-2 2Z"/>
+</g>
+<text x="59" y="225" fill="#d8e1ef" font-size="14">Monitor Arrangement</text>
+<text x="22" y="270" fill="#9ca8bd" font-size="12">Explicitly includes the laptop</text>
+</g>
+<g transform="translate(764,432)">
+<rect width="328" height="298" rx="12" fill="#202633" stroke="#343d50"/>
+<text x="22" y="33" fill="#c6d8fa" font-size="15" font-weight="600">F</text>
+<text x="46" y="33" fill="#ecf0f8" font-size="15" font-weight="600">Display adjustments</text>
+<g transform="translate(28,62) scale(4)" color="#bdd0f2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+  <rect x="2" y="3" width="20" height="14" rx="1"/>
+  <path d="M12 17v4M8 21h8M7 6v8M17 6v8"/>
+  <path d="M5 9h4M15 12h4" stroke-width="2.4"/>
+</g>
+<rect x="184" y="75" width="104" height="72" rx="8" fill="#edf1f7"/>
+<g transform="translate(220,95) scale(1.33)" color="#354761" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+  <rect x="2" y="3" width="20" height="14" rx="1"/>
+  <path d="M12 17v4M8 21h8M7 6v8M17 6v8"/>
+  <path d="M5 9h4M15 12h4" stroke-width="2.4"/>
+</g>
+<path d="M22 188h284" stroke="#343d50"/>
+<g transform="translate(25,210) scale(.8333)" color="#d8e1ef" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+  <rect x="2" y="3" width="20" height="14" rx="1"/>
+  <path d="M12 17v4M8 21h8M7 6v8M17 6v8"/>
+  <path d="M5 9h4M15 12h4" stroke-width="2.4"/>
+</g>
+<text x="59" y="225" fill="#d8e1ef" font-size="14">Monitor Arrangement</text>
+<text x="22" y="270" fill="#9ca8bd" font-size="12">Familiar display settings symbol</text>
+</g>
+</g></svg>

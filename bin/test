@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.."
+go test -race ./...
+go vet ./...
+luac -p hypr/runtime.lua
+for script in bin/* tests/*.sh; do bash -n "$script"; done
+git diff --check

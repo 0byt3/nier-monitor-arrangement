@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -euo pipefail
+root=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
+stage=$(mktemp -d)
+trap 'rm -rf -- "$stage"' EXIT
+name=nier-monitor-arrangement
+version=0.1.0
+mkdir -p "$root/dist"
+tar --exclude=./.git --exclude=./build --exclude=./dist --exclude=./src --exclude=./pkg \
+  --transform="s|^\.|$name-$version|" -czf "$stage/$name-$version.tar.gz" -C "$root" .
+checksum=$(sha256sum "$stage/$name-$version.tar.gz" | cut -d ' ' -f1)
+sed "s/@SOURCE_SHA256@/$checksum/" "$root/packaging/PKGBUILD.in" > "$stage/PKGBUILD"
+cd "$stage"
+makepkg --nodeps --noconfirm
+bsdtar -tf ./*.pkg.tar.zst | grep -q '^usr/share/nier/plugins/nier.monitor-arrangement/runtime.lua$'
+cp ./*.pkg.tar.zst "$root/dist/"
+printf 'Package output: %s/dist/\n' "$root"

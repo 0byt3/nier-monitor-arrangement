@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+set -euo pipefail
+root=$(cd -- "$(dirname -- "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)
+if [[ -f $root/qml/shell.qml ]]; then
+  assets=$root/qml
+  helper=$root/build/nier-monitor-arrangement-backend
+  enable=$root/bin/enable-hyprland
+else
+  assets=/usr/share/nier/plugins/nier.monitor-arrangement
+  helper=/usr/share/nier/bin/nier-monitor-arrangement-backend
+  enable=/usr/share/nier/bin/nier-monitor-arrangement-enable
+fi
+case ${1:-open} in
+  open)
+    [[ -x $helper ]] || { echo "Missing backend: run bin/build first." >&2; exit 1; }
+    export NIER_MONITOR_ARRANGEMENT_BACKEND=$helper
+    exec quickshell --no-duplicate -p "$assets/shell.qml"
+    ;;
+  snapshot|save|apply) exec "$helper" "$@" ;;
+  enable) exec /bin/bash "$enable" ;;
+  --help|-h) printf '%s\n' 'Usage: nier-monitor-arrangement [open|snapshot|save|apply|enable]' 'save reads a JSON request from stdin. enable installs the per-user Hyprland hook.' ;;
+  *) printf 'Unknown command: %s\n' "$1" >&2; exit 1 ;;
+esac

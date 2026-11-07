@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+set -euo pipefail
+(( EUID != 0 )) || { echo 'Run this command as your desktop user, without sudo.' >&2; exit 1; }
+root=$(cd -- "$(dirname -- "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)
+if [[ -f $root/hypr/runtime.lua ]]; then
+  runtime=$root/hypr/runtime.lua
+  helper=$root/build/nier-monitor-arrangement-backend
+else
+  runtime=/usr/share/nier/plugins/nier.monitor-arrangement/runtime.lua
+  helper=/usr/share/nier/bin/nier-monitor-arrangement-backend
+fi
+[[ -x $helper && -f $runtime ]] || { echo 'Build or install the program first.' >&2; exit 1; }
+config=$HOME/.config/hypr/monitors.lua
+[[ -f $config && ! -L $config ]] || { echo "Expected a regular file: $config" >&2; exit 1; }
+stage=$(mktemp -d)
+trap 'rm -rf -- "$stage"' EXIT
+cp -p -- "$config" "$stage/before"
+# Replace only our exact managed block and the earlier automatic-order helper
+# from this project. Leave every unrelated monitor rule intact.
+awk '
+ /^-- >>> nier monitor arrangement >>>$/ { managed=1; next }
+ /^-- <<< nier monitor arrangement <<<$/{ managed=0; next }
+ managed { next }
+ /^-- External monitors run left to right in discovery order; laptop goes last\.$/{ old=1; next }
+ old && /^-- Monitor scale is Hyprland/ { old=0 }
+ old { next }
+ /^-- Run after the monitor rules above have been applied\.$/{ legacy=1; next }
+ legacy && /^schedule_layout\(\)$/ { legacy=0; next }
+ { print }
+ END { if (managed || old) exit 1 }
+' "$stage/before" > "$stage/after"
+# Quote through Lua's %q so paths never become executable Lua text.
+lua -E - "$runtime" "$helper" "$stage/after" <<'LUA'
+local input = assert(io.open(arg[3], "rb"))
+local contents = input:read("*a"):gsub("%s+$", "")
+input:close()
+local output = assert(io.open(arg[3], "wb"))
+output:write(contents, "\n\n-- >>> nier monitor arrangement >>>\n")
+output:write("-- Match saved monitor combinations, with external-left/laptop-right fallback.\n")
+output:write(string.format("assert(loadfile(%q))(%q)\n", arg[1], arg[2]))
+output:write("-- <<< nier monitor arrangement <<<\n")
+output:close()
+LUA
+luac -p "$stage/after"
+cmp -s "$config" "$stage/before" || { echo 'monitors.lua changed concurrently; retry.' >&2; exit 1; }
+if cmp -s "$config" "$stage/after"; then echo 'Hyprland hook is already enabled.'; exit 0; fi
+backup=$(mktemp "$config.before-arrangement.XXXXXX")
+cp -p -- "$config" "$backup"
+cp -- "$stage/after" "$config"
+hyprctl reload
+errors=$(hyprctl configerrors)
+if [[ -n ${errors//[[:space:]]/} ]]; then
+  cp -- "$stage/before" "$config"
+  hyprctl reload
+  printf 'Configuration validation failed; restored the original.\n%s\n' "$errors" >&2
+  exit 1
+fi
+printf 'Enabled monitor arrangement profiles. Backup: %s\n' "$backup"

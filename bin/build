@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.."
+mkdir -p build
+CGO_ENABLED=0 go build -trimpath -o build/nier-monitor-arrangement-backend ./cmd/arrangement

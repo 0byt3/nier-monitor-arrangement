@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Monitor Arrangement
+Name[da]=Skærmplacering
+Comment=Arrange displays and remember each monitor combination
+Comment[da]=Placer skærme og husk hver skærmkombination
+Exec=nier-monitor-arrangement open
+Icon=nier-monitor-arrangement
+Terminal=false
+Categories=Settings;HardwareSettings;
+Keywords=monitor;display;layout;screen;
