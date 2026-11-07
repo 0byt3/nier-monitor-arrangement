@@ -12,6 +12,6 @@ checksum=$(sha256sum "$stage/$name-$version.tar.gz" | cut -d ' ' -f1)
 sed "s/@SOURCE_SHA256@/$checksum/" "$root/packaging/PKGBUILD.in" > "$stage/PKGBUILD"
 cd "$stage"
 makepkg --nodeps --noconfirm
-bsdtar -tf ./*.pkg.tar.zst | grep -q '^usr/share/nier/plugins/nier.monitor-arrangement/runtime.lua$'
+bsdtar -tf ./*.pkg.tar.zst | grep -q '^usr/local/nier/share/hypr/monitor-arrangement-runtime.lua$'
 cp ./*.pkg.tar.zst "$root/dist/"
 printf 'Package output: %s/dist/\n' "$root"

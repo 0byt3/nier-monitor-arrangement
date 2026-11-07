@@ -17,7 +17,7 @@ case ${1:-open} in
     exec quickshell --no-duplicate -p "$assets/shell.qml"
     ;;
   snapshot|save|apply) exec "$helper" "$@" ;;
-  enable) exec /bin/bash "$enable" ;;
-  --help|-h) printf '%s\n' 'Usage: nier-monitor-arrangement [open|snapshot|save|apply|enable]' 'save reads a JSON request from stdin. enable installs the per-user Hyprland hook.' ;;
+  enable) shift; exec /bin/bash "$enable" "$@" ;;
+  --help|-h) printf '%s\n' 'Usage: nier-monitor-arrangement [open|snapshot|save|apply|enable]' 'save reads a JSON request from stdin. enable [--no-reload] installs the per-user Hyprland hook.' ;;
   *) printf 'Unknown command: %s\n' "$1" >&2; exit 1 ;;
 esac

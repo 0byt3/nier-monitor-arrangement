@@ -18,18 +18,68 @@ bin/build
 bin/nier-monitor-arrangement open
 ```
 
-To enable saved-profile matching at startup and on monitor connection/removal:
+## Install without a package
+
+Install Bash, Go, Quickshell, Lua 5.4+ and Lua-enabled Hyprland first. Run as your
+normal desktop user from the checkout:
 
 ```bash
-bin/nier-monitor-arrangement enable
+./install.sh
 ```
 
-The enable command backs up `~/.config/hypr/monitors.lua`, adds a managed loader,
-and validates Hyprland after reloading it. It replaces only the earlier
-Nier automatic-order block when present, preserving the other monitor rules.
-On a config error it restores the original. Keep the source directory in place
-when using a development installation. Packaged installations use stable paths
-under `/usr/share/nier/`.
+The script builds the backend as that user, uses sudo to copy system files, then
+adds a managed block to `~/.config/hypr/monitors.lua`. It backs up that file,
+validates Lua, reloads Hyprland and restores the original on a reload/config error.
+The existing `monitors.lua` must be a regular file already loaded by your main
+Hyprland configuration (as on Omarchy). Existing monitor mode/scale settings are
+preserved; the earlier Nier automatic-order helper is replaced when present.
+After installation, the checkout is no longer needed by the user hook.
+
+Useful options:
+
+```bash
+./install.sh --skip-build             # Use the existing built backend.
+./install.sh --no-enable              # Install files without changing user config.
+./install.sh --no-reload              # Add the hook without a running compositor.
+./install.sh --destdir /tmp/nier-root  # Stage files only; implies --no-enable.
+```
+
+A root invocation must use `--no-enable`; user configuration is always handled
+by the actual desktop user. The script refuses to overwrite a pacman-managed
+installation. It does not install dependencies or publish packages.
+
+The standalone installer and pacman recipe share `packaging/install-files.sh`,
+so both install the same files. Runtime location:
+
+```text
+/usr/local/nier/share/hypr/monitor-arrangement-runtime.lua
+```
+
+The generated `monitors.lua` block resolves that file at load time:
+
+```lua
+do
+  local nier_path = os.getenv("NIER_PATH")
+  if not nier_path or nier_path == "" then nier_path = "/usr/local/nier" end
+  if nier_path ~= "/" then nier_path = nier_path:gsub("/+$", "") end
+  dofile(nier_path .. "/share/hypr/monitor-arrangement-runtime.lua")
+end
+```
+
+`nier-desktop` supplies `NIER_PATH=/usr/local/nier` for login shells and
+UWSM sessions. The variable is an installation prefix; the runtime is always
+resolved beneath `$NIER_PATH/share/hypr/`. If the variable is missing or empty,
+the loader defaults to `/usr/local/nier`. This allows standalone use without
+`nier-desktop`. Custom installation prefixes and trailing slashes are supported.
+The application installer does not overwrite the shared environment files owned
+by `nier-desktop`.
+
+To update/repair only the hook after installing files:
+
+```bash
+nier-monitor-arrangement enable
+nier-monitor-arrangement enable --no-reload
+```
 
 ## Saved arrangements
 
@@ -78,7 +128,7 @@ queued until wake rather than falsely reported as applied or failed.
 
 ## Hyprland integration
 
-The small `hypr/runtime.lua` loader schedules the backend on startup, config
+The installed `monitor-arrangement-runtime.lua` loader schedules the backend on startup, config
 reload and monitor added/removed events, coalescing event bursts for 200 ms. The
 same Go matching code serves the editor and runtime, avoiding differences between
 Lua monitor objects and the richer `hyprctl monitors -j` metadata. The profiles
@@ -104,7 +154,7 @@ above the managed loader in `monitors.lua`.
 | `nier-monitor-arrangement snapshot` | Read active monitors/profile metadata as JSON |
 | `nier-monitor-arrangement save` | Read a snapshot-based save request as JSON on stdin |
 | `nier-monitor-arrangement apply` | Apply the matching saved profile or automatic fallback |
-| `nier-monitor-arrangement enable` | Install the per-user Hyprland loader with backup |
+| `nier-monitor-arrangement enable [--no-reload]` | Install the per-user NIER_PATH-based loader with backup |
 
 The backend emits JSON with an `ok` field, error text and a nonzero exit code on
 failure. `snapshot` is read-only. To use a temporary profile file in a test, set
@@ -125,6 +175,7 @@ fallback; a Danish catalog is included. Dynamic monitor labels use plain text.
 ```bash
 bin/test
 bash tests/enable.sh
+bash tests/install.sh
 bash tests/interaction.sh
 bash tests/gui-smoke.sh
 bin/package
@@ -133,14 +184,15 @@ nier-monitor-arrangement enable
 ```
 
 The package installs commands in `/usr/share/nier/bin/` with `/usr/bin` symlinks,
-read-only QML/runtime assets in `/usr/share/nier/plugins/nier.monitor-arrangement/`,
-and a normal app-launcher desktop entry using the selected desktop-and-laptop SVG icon. Package construction generates a local
+read-only QML assets in `/usr/share/nier/plugins/nier.monitor-arrangement/`,
+the runtime in `/usr/local/nier/share/hypr/`, and a normal app-launcher desktop entry using the selected desktop-and-laptop SVG icon. Package construction generates a local
 source archive and pins its SHA-256 in the rendered PKGBUILD. It does not publish
 anything or modify user configuration automatically.
 
 Tests cover identity matching, delimiter escaping, duplicate models, scale and
 rotation, overlaps, stale edits, Lua decoding limits, atomic saves/backups,
-multiple profiles, fallback ordering and failed application. Go tests use fake
+multiple profiles, fallback ordering, failed application, NIER_PATH-based hook
+generation and staged installation without user-config changes. Go tests use fake
 Hyprland commands and disposable directories. GUI previews use fictional screens:
 
 ```bash

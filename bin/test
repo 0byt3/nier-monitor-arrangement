@@ -4,5 +4,5 @@ cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.."
 go test -race ./...
 go vet ./...
 luac -p hypr/runtime.lua
-for script in bin/* tests/*.sh; do bash -n "$script"; done
+for script in install.sh bin/* tests/*.sh packaging/install-files.sh; do bash -n "$script"; done
 git diff --check

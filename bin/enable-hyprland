@@ -1,15 +1,19 @@
 #!/usr/bin/env bash
 set -euo pipefail
 (( EUID != 0 )) || { echo 'Run this command as your desktop user, without sudo.' >&2; exit 1; }
-root=$(cd -- "$(dirname -- "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)
-if [[ -f $root/hypr/runtime.lua ]]; then
-  runtime=$root/hypr/runtime.lua
-  helper=$root/build/nier-monitor-arrangement-backend
-else
-  runtime=/usr/share/nier/plugins/nier.monitor-arrangement/runtime.lua
-  helper=/usr/share/nier/bin/nier-monitor-arrangement-backend
-fi
-[[ -x $helper && -f $runtime ]] || { echo 'Build or install the program first.' >&2; exit 1; }
+reload=true
+case ${1:-} in
+  --no-reload) reload=false ;;
+  --help|-h) echo 'Usage: nier-monitor-arrangement-enable [--no-reload]'; exit 0 ;;
+  '') ;;
+  *) echo 'Usage: nier-monitor-arrangement-enable [--no-reload]' >&2; exit 1 ;;
+esac
+(( $# <= 1 )) || { echo 'Too many arguments.' >&2; exit 1; }
+nier_path=${NIER_PATH:-/usr/local/nier}
+while [[ $nier_path != / && $nier_path == */ ]]; do nier_path=${nier_path%/}; done
+runtime=$nier_path/share/hypr/monitor-arrangement-runtime.lua
+helper=${NIER_MONITOR_ARRANGEMENT_BACKEND:-/usr/share/nier/bin/nier-monitor-arrangement-backend}
+[[ -x $helper && -f $runtime ]] || { echo 'Install the program first (./install.sh or its pacman package).' >&2; exit 1; }
 config=$HOME/.config/hypr/monitors.lua
 [[ -f $config && ! -L $config ]] || { echo "Expected a regular file: $config" >&2; exit 1; }
 stage=$(mktemp -d)
@@ -29,16 +33,22 @@ awk '
  { print }
  END { if (managed || old) exit 1 }
 ' "$stage/before" > "$stage/after"
-# Quote through Lua's %q so paths never become executable Lua text.
-lua -E - "$runtime" "$helper" "$stage/after" <<'LUA'
-local input = assert(io.open(arg[3], "rb"))
+# The user config resolves installed assets at load time, never from the checkout.
+lua -E - "$stage/after" <<'LUA'
+local input = assert(io.open(arg[1], "rb"))
 local contents = input:read("*a"):gsub("%s+$", "")
 input:close()
-local output = assert(io.open(arg[3], "wb"))
+local output = assert(io.open(arg[1], "wb"))
 output:write(contents, "\n\n-- >>> nier monitor arrangement >>>\n")
-output:write("-- Match saved monitor combinations, with external-left/laptop-right fallback.\n")
-output:write(string.format("assert(loadfile(%q))(%q)\n", arg[1], arg[2]))
-output:write("-- <<< nier monitor arrangement <<<\n")
+output:write([=[-- Match saved monitor combinations, with external-left/laptop-right fallback.
+do
+  local nier_path = os.getenv("NIER_PATH")
+  if not nier_path or nier_path == "" then nier_path = "/usr/local/nier" end
+  if nier_path ~= "/" then nier_path = nier_path:gsub("/+$", "") end
+  dofile(nier_path .. "/share/hypr/monitor-arrangement-runtime.lua")
+end
+-- <<< nier monitor arrangement <<<
+]=])
 output:close()
 LUA
 luac -p "$stage/after"
@@ -47,12 +57,24 @@ if cmp -s "$config" "$stage/after"; then echo 'Hyprland hook is already enabled.
 backup=$(mktemp "$config.before-arrangement.XXXXXX")
 cp -p -- "$config" "$backup"
 cp -- "$stage/after" "$config"
-hyprctl reload
-errors=$(hyprctl configerrors)
-if [[ -n ${errors//[[:space:]]/} ]]; then
-  cp -- "$stage/before" "$config"
-  hyprctl reload
-  printf 'Configuration validation failed; restored the original.\n%s\n' "$errors" >&2
-  exit 1
+if [[ $reload == true ]]; then
+  if ! hyprctl reload; then
+    cp -- "$stage/before" "$config"
+    hyprctl reload || :
+    echo 'Hyprland reload failed; restored the original configuration.' >&2
+    exit 1
+  fi
+  if ! errors=$(hyprctl configerrors); then
+    cp -- "$stage/before" "$config"
+    hyprctl reload || :
+    echo 'Could not validate Hyprland; restored the original configuration.' >&2
+    exit 1
+  fi
+  if [[ -n ${errors//[[:space:]]/} ]]; then
+    cp -- "$stage/before" "$config"
+    hyprctl reload || :
+    printf 'Configuration validation failed; restored the original.\n%s\n' "$errors" >&2
+    exit 1
+  fi
 fi
 printf 'Enabled monitor arrangement profiles. Backup: %s\n' "$backup"

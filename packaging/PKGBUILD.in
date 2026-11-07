@@ -1,8 +1,9 @@
 pkgname=nier-monitor-arrangement
 pkgver=0.1.0
-pkgrel=2
+pkgrel=4
 pkgdesc='Standalone Quickshell display arrangement editor with saved Hyprland profiles'
 arch=('x86_64' 'aarch64')
+url='https://github.com/0byt3/nier-monitor-arrangement'
 license=('MIT')
 depends=('bash' 'quickshell' 'hyprland>=0.55' 'lua' 'qt6-declarative')
 makedepends=('go')
@@ -23,20 +24,5 @@ check() {
 
 package() {
   cd "$srcdir/$pkgname-$pkgver"
-  local assets="$pkgdir/usr/share/nier/plugins/nier.monitor-arrangement"
-  install -d "$assets/i18n" "$pkgdir/usr/bin"
-  install -m644 qml/shell.qml qml/Editor.qml qml/Theme.qml qml/Strings.qml hypr/runtime.lua "$assets/"
-  install -m644 qml/i18n/*.json "$assets/i18n/"
-  install -Dm755 build/nier-monitor-arrangement-backend "$pkgdir/usr/share/nier/bin/nier-monitor-arrangement-backend"
-  install -Dm755 bin/nier-monitor-arrangement "$pkgdir/usr/share/nier/bin/nier-monitor-arrangement"
-  install -Dm755 bin/enable-hyprland "$pkgdir/usr/share/nier/bin/nier-monitor-arrangement-enable"
-  ln -s /usr/share/nier/bin/nier-monitor-arrangement "$pkgdir/usr/bin/nier-monitor-arrangement"
-  ln -s /usr/share/nier/bin/nier-monitor-arrangement-enable "$pkgdir/usr/bin/nier-monitor-arrangement-enable"
-  install -Dm644 packaging/nier-monitor-arrangement.svg "$assets/nier-monitor-arrangement.svg"
-  install -d "$pkgdir/usr/share/icons/hicolor/scalable/apps"
-  ln -s /usr/share/nier/plugins/nier.monitor-arrangement/nier-monitor-arrangement.svg \
-    "$pkgdir/usr/share/icons/hicolor/scalable/apps/nier-monitor-arrangement.svg"
-  install -Dm644 packaging/nier-monitor-arrangement.desktop "$pkgdir/usr/share/applications/nier-monitor-arrangement.desktop"
-  install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
-  install -Dm644 README.md "$pkgdir/usr/share/doc/$pkgname/README.md"
+  bash packaging/install-files.sh "$pkgdir"
 }

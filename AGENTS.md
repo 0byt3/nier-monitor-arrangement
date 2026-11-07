@@ -12,7 +12,14 @@
 - Save atomically, preserve other profiles, reject overlapping layouts and stale
   GUI snapshots, and back up changed profiles. Do not mutate live desktop config
   from tests. Tests use temporary HOME/runtime directories and fake hyprctl.
-- Install read-only assets under /usr/share/nier/plugins/nier.monitor-arrangement,
-  binaries under /usr/share/nier/bin, with standard-location command symlinks.
+- Install the runtime as /usr/local/nier/share/hypr/monitor-arrangement-runtime.lua.
+  The generated user hook reads NIER_PATH as an installation prefix, defaulting
+  to /usr/local/nier, and appends /share/hypr/monitor-arrangement-runtime.lua;
+  never embed checkout or backend paths in monitors.lua. Other read-only assets
+  stay under /usr/share/nier/plugins/nier.monitor-arrangement, binaries under
+  /usr/share/nier/bin, with standard-location command symlinks.
+- packaging/install-files.sh is the shared manifest for pacman and install.sh.
+  Staged installs must never edit HOME or contact the live compositor. Installing
+  system files and enabling the invoking user's hook are separate phases.
 - Run go test -race ./..., go vet ./..., Bash syntax, Lua syntax, package build,
   offscreen GUI smoke tests and git diff --check before delivering changes.
