@@ -17,6 +17,7 @@ local function quote(s)
 end
 local seen = {}
 local function encode(value, depth)
+  if type(value) == "boolean" then return tostring(value) end
   if type(value) == "number" then
     if value ~= value or value == math.huge or value == -math.huge then error("invalid number") end
     return tostring(value)

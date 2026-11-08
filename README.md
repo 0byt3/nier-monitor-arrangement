@@ -94,7 +94,7 @@ Example with fictional serials:
 ```lua
 return {
   ["EXTERNAL-01:LAPTOP-01"] = {
-    ["EXTERNAL-01"] = { x = 0, y = -300 },
+    ["EXTERNAL-01"] = { x = 0, y = -300, primary = true },
     ["LAPTOP-01"] = { x = 2560, y = 0 },
   },
   ["LAPTOP-01"] = {
@@ -118,7 +118,12 @@ scale or profile file, rejects overlapping screens, and writes atomically. Each
 changed existing file gets a private `monitor-arrangement.lua.before-*` backup.
 Saved Lua is data only: the reader runs it with an empty environment, an
 instruction limit, a timeout and schema checks. Profiles can contain tables and
-numbers; they cannot call `os`, `io`, or other runtime APIs.
+numbers and the optional `primary` boolean; they cannot call `os`, `io`, or other runtime APIs.
+
+Choose **Primary monitor** in the editor, then **Save & apply**, to remember one
+primary display for that arrangement. **Not set** clears the selection. Existing
+profiles without this setting remain valid. The selection follows the monitor's
+stable identity, so a connector rename does not lose it when the serial is unique.
 
 If applying fails, the editor explicitly reports **Saved, but could not apply**.
 The saved profile remains available for correction. Actual monitor positions are
@@ -145,6 +150,16 @@ replaced with a different layout.
 Keep other monitor-position automation disabled: concurrent rules or services
 can override the arrangement. Your resolution and scale rules should remain
 above the managed loader in `monitors.lua`.
+
+After application, other Lua code inside Hyprland can read the global
+`NIER_PRIMARY_MONITOR`. Its value is the selected display's current connector
+name, such as `"DP-6"`, or `nil` when unset or when the connected combination has
+no matching primary selection. This setting does not change focus or placement.
+
+The runtime clears the global on load and monitor changes, then refreshes it
+asynchronously through the backend. Read it when needed in callbacks; it is not
+ready during initial top-level config evaluation. It belongs to Hyprland's Lua
+state, so it is not an environment variable or a global in separate Lua programs.
 
 ## Commands and shortcuts
 
@@ -191,7 +206,7 @@ anything or modify user configuration automatically.
 
 Tests cover identity matching, delimiter escaping, duplicate models, scale and
 rotation, overlaps, stale edits, Lua decoding limits, atomic saves/backups,
-multiple profiles, fallback ordering, failed application, NIER_PATH-based hook
+multiple profiles, primary selection/clearing and connector renames, fallback ordering, failed application, NIER_PATH-based hook
 generation and staged installation without user-config changes. Go tests use fake
 Hyprland commands and disposable directories. GUI previews use fictional screens:
 

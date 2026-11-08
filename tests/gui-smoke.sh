@@ -12,7 +12,7 @@ trap cleanup EXIT
 export HOME=$stage/home XDG_RUNTIME_DIR=$stage/runtime
 export QT_QPA_PLATFORM=offscreen QT_QPA_PLATFORMTHEME=basic QT_QUICK_BACKEND=software
 export NIER_MONITOR_ARRANGEMENT_BACKEND=$root/build/nier-monitor-arrangement-backend
-export NIER_TEST_MONITORS=$stage/monitors.json NIER_TEST_NEXT=$stage/next.json
+export NIER_TEST_MONITORS=$stage/monitors.json NIER_TEST_NEXT=$stage/next.json NIER_TEST_EVAL=$stage/eval.lua
 mkdir -p "$HOME/.config/omarchy" "$XDG_RUNTIME_DIR" "$stage/bin"
 chmod 700 "$XDG_RUNTIME_DIR"
 cat > "$NIER_TEST_MONITORS" <<'JSON'
@@ -23,7 +23,7 @@ cat > "$stage/bin/hyprctl" <<'SH'
 #!/usr/bin/env bash
 set -euo pipefail
 if [[ $1 == monitors ]]; then cat "$NIER_TEST_MONITORS"
-elif [[ $1 == eval ]]; then cp "$NIER_TEST_NEXT" "$NIER_TEST_MONITORS"; printf 'ok\n'
+elif [[ $1 == eval ]]; then printf '%s' "$2" > "$NIER_TEST_EVAL"; cp "$NIER_TEST_NEXT" "$NIER_TEST_MONITORS"; printf 'ok\n'
 else exit 1; fi
 SH
 chmod +x "$stage/bin/hyprctl"
@@ -37,7 +37,12 @@ for ((attempt=0;attempt<80;attempt++)); do
 done
 jq -e '.ready' "$stage/status.json" >/dev/null || { cat "$stage/gui.log"; exit 1; }
 ipc move DP-1 0 -200
+ipc primary DP-1
+ipc status | jq -e '.primary == "DP-1"' >/dev/null
 ipc status | jq -e '.dirty and (.overlapping|not)' >/dev/null
+# A second launch must reopen the same editor and preserve unsaved changes.
+timeout 5 bash "$root/bin/nier-monitor-arrangement" open
+ipc status | jq -e '.dirty and .primary == "DP-1" and .monitors[0].y == -200' >/dev/null
 ipc save
 for ((attempt=0;attempt<80;attempt++)); do
   ipc status > "$stage/status.json"
@@ -45,7 +50,12 @@ for ((attempt=0;attempt<80;attempt++)); do
   sleep 0.1
 done
 jq -e '.message == "Saved and applied."' "$stage/status.json" >/dev/null || { cat "$stage/status.json" "$stage/gui.log"; exit 1; }
-"$NIER_MONITOR_ARRANGEMENT_BACKEND" snapshot | jq -e '.snapshot.arrangement["EXTERNAL-01"].y == -200' >/dev/null
+"$NIER_MONITOR_ARRANGEMENT_BACKEND" snapshot | jq -e '.snapshot.arrangement["EXTERNAL-01"].y == -200 and .snapshot.arrangement["EXTERNAL-01"].primary == true and .snapshot.primary == "DP-1"' >/dev/null
+lua -E - "$NIER_TEST_EVAL" <<'LUA'
+hl = {monitor=function() end}
+dofile(arg[1])
+assert(NIER_PRIMARY_MONITOR == "DP-1")
+LUA
 # Language switches are confined to the test HOME, not the user's preferences.
 printf 'da\n' > "$HOME/.config/omarchy/language"
 sleep 0.3
@@ -55,4 +65,4 @@ ipc capture "$stage/editor.png"
 sleep 0.3
 [[ -s $stage/editor.png ]]
 if [[ -n ${NIER_GUI_CAPTURE:-} ]]; then cp "$stage/editor.png" "$NIER_GUI_CAPTURE"; fi
-printf '%s\n' 'PASS: QML discovery, vertical edit, save/apply, persisted Lua, language reload and screenshot'
+printf '%s\n' 'PASS: QML discovery, primary selection/global, vertical edit, save/apply, persisted Lua, language reload and screenshot'

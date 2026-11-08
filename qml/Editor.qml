@@ -22,6 +22,13 @@ FloatingWindow {
     property int selected: -1
     property bool busy: false
     property bool dirty: false
+    property string primaryMonitor: ""
+    readonly property var primaryChoices: {
+        contentRevision
+        const names = [""]
+        for (let i = 0; i < monitors.count; i++) names.push(monitors.get(i).name)
+        return names
+    }
     property bool ready: false
     property bool snapEdges: true
     property string messageKey: "Loading displays…"
@@ -78,6 +85,7 @@ FloatingWindow {
                 logicalHeight: m.logicalHeight, pixelWidth: m.width, pixelHeight: m.height,
                 displayScale: m.scale})
         }
+        primaryMonitor = data.primary || ""
         selected = monitors.count > 0 ? 0 : -1
         for (let i = 0; i < monitors.count; i++) if (monitors.get(i).name === oldName) selected = i
         dirty = false
@@ -114,7 +122,13 @@ FloatingWindow {
     }
     function save() {
         if (!snapshot || busy || overlapping) return
-        run("save", {fingerprint: snapshot.fingerprint, revision: snapshot.revision, monitors: positions()})
+        run("save", {fingerprint: snapshot.fingerprint, revision: snapshot.revision, primary: primaryMonitor, monitors: positions()})
+    }
+    function setPrimary(name) {
+        if (busy || name === primaryMonitor) return
+        if (primaryChoices.indexOf(name) < 0) { notify("Primary monitor is not connected.", true); return }
+        primaryMonitor = name
+        dirty = true
     }
     function setPosition(index, x, y) {
         if (busy || index < 0 || index >= monitors.count || !isFinite(x) || !isFinite(y)) return
@@ -170,6 +184,7 @@ FloatingWindow {
             const p = snapshot.arrangement[monitors.get(i).identity]
             if (p) setPosition(i, p.x, p.y)
         }
+        setPrimary(snapshot.primary || "")
         fit()
         notify("Saved arrangement loaded for editing.", false)
     }
@@ -196,13 +211,24 @@ FloatingWindow {
         if (dirty) { pendingDiscard = "quit"; discardDialog.open() }
         else Qt.quit()
     }
+    function showWindow() {
+        // Remap even if Qt still reports a closed backing window as visible.
+        visible = false
+        Qt.callLater(function() { root.visible = true })
+    }
 
     Component.onCompleted: {
         if (demoSnapshot) { acceptSnapshot(demoSnapshot,true); notify("Ready",false) }
         else run("snapshot")
     }
     onClosed: {
-        if (dirty) { visible = true; pendingDiscard = "quit"; discardDialog.open() }
+        if (dirty) {
+            Qt.callLater(function() {
+                root.showWindow()
+                root.pendingDiscard = "quit"
+                discardDialog.open()
+            })
+        }
         else Qt.quit()
     }
 
@@ -227,10 +253,12 @@ FloatingWindow {
 
     IpcHandler {
         target: "arrangement"
-        function status(): string { return JSON.stringify({ready: root.ready, busy: root.busy, dirty: root.dirty, overlapping: root.overlapping, message: root.message, monitors: root.positions()}) }
+        function show(): void { root.showWindow() }
+        function status(): string { return JSON.stringify({ready: root.ready, busy: root.busy, dirty: root.dirty, overlapping: root.overlapping, primary: root.primaryMonitor, message: root.message, monitors: root.positions()}) }
         function move(name: string, x: int, y: int): void {
             for (let i=0;i<monitors.count;i++) if (monitors.get(i).name===name) {root.selected=i;root.setPosition(i,x,y);return}
         }
+        function primary(name: string): void { root.setPrimary(name) }
         function save(): void { root.save() }
         function capture(path: string): void { appContent.grabToImage(function(result) { result.saveToFile(path) }) }
     }
@@ -379,6 +407,36 @@ FloatingWindow {
                             text: root.selectedMonitor ? String(root.selectedMonitor.posY) : ""
                             validator: IntValidator { bottom: -65536; top: 65536 }
                             onEditingFinished: if (acceptableInput && root.selectedMonitor) root.setPosition(root.selected,root.selectedMonitor.posX,Number(text))
+                        }
+                    }
+                    Label { text: strings.t("Primary monitor"); textFormat: Text.PlainText; color: theme.muted; font.pixelSize: 12 }
+                    ComboBox {
+                        id: primarySelector
+                        objectName: "primaryMonitorSelector"
+                        Layout.fillWidth: true
+                        model: root.primaryChoices
+                        currentIndex: Math.max(0, root.primaryChoices.indexOf(root.primaryMonitor))
+                        displayText: currentIndex > 0 ? currentText : strings.t("Not set")
+                        enabled: root.ready && !root.busy
+                        onActivated: function(index) { root.setPrimary(root.primaryChoices[index]) }
+                        contentItem: Label {
+                            text: primarySelector.displayText
+                            textFormat: Text.PlainText
+                            color: theme.foreground
+                            verticalAlignment: Text.AlignVCenter
+                            elide: Text.ElideRight
+                        }
+                        delegate: ItemDelegate {
+                            required property string modelData
+                            required property int index
+                            width: primarySelector.width
+                            highlighted: primarySelector.highlightedIndex === index
+                            contentItem: Label {
+                                text: modelData || strings.t("Not set")
+                                textFormat: Text.PlainText
+                                color: theme.foreground
+                                elide: Text.ElideRight
+                            }
                         }
                     }
                     Label { Layout.fillWidth: true; text: strings.t("Coordinates use logical pixels; negative Y places a screen higher."); textFormat: Text.PlainText; color: theme.muted; font.pixelSize: 12; wrapMode: Text.WordWrap }

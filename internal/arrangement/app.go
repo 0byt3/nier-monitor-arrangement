@@ -85,7 +85,7 @@ func (a App) Snapshot(ctx context.Context) (Snapshot, error) {
 	}
 	key := Key(monitors)
 	_, saved := profiles[key]
-	return Snapshot{Monitors: monitors, Key: key, Fingerprint: Fingerprint(monitors), Revision: revision, Saved: saved, Path: a.Path, Profiles: len(profiles), Arrangement: profiles[key]}, nil
+	return Snapshot{Primary: PrimaryName(monitors, profiles[key]), Monitors: monitors, Key: key, Fingerprint: Fingerprint(monitors), Revision: revision, Saved: saved, Path: a.Path, Profiles: len(profiles), Arrangement: profiles[key]}, nil
 }
 
 func (a App) lock() (func(), error) {
@@ -108,14 +108,19 @@ func (a App) apply(ctx context.Context, monitors []Monitor, profile Profile) err
 		return err
 	}
 	var code strings.Builder
+	primary := PrimaryName(monitors, profile)
+	if primary == "" {
+		code.WriteString("NIER_PRIMARY_MONITOR=nil;")
+	} else {
+		fmt.Fprintf(&code, "NIER_PRIMARY_MONITOR=%s;", LuaQuote(primary))
+	}
+	geometryChanged := false
 	for _, m := range monitors {
 		p := profile[m.Identity]
 		if m.X != p.X || m.Y != p.Y {
+			geometryChanged = true
 			fmt.Fprintf(&code, "hl.monitor({output=%s,position=%s});", LuaQuote(m.Name), LuaQuote(fmt.Sprintf("%dx%d", p.X, p.Y)))
 		}
-	}
-	if code.Len() == 0 {
-		return nil
 	}
 	output, err := a.command(ctx, "eval", code.String())
 	if err != nil {
@@ -123,6 +128,10 @@ func (a App) apply(ctx context.Context, monitors []Monitor, profile Profile) err
 	}
 	if strings.TrimSpace(string(output)) != "ok" {
 		return fmt.Errorf("Hyprland rejected the layout: %s", strings.TrimSpace(string(output)))
+	}
+	// The Lua global is updated even when all screen positions are already current.
+	if !geometryChanged {
+		return nil
 	}
 	allAsleep := len(monitors) > 0
 	for _, m := range monitors {
@@ -254,12 +263,12 @@ func (a App) fallback(monitors []Monitor) (Profile, error) {
 	profile := Profile{}
 	x := 0
 	for _, id := range order {
-		profile[id] = Position{x, 0}
+		profile[id] = Position{X: x, Y: 0}
 		x += active[id].LogicalWidth
 	}
 	for _, m := range monitors {
 		if m.Name == "eDP-1" {
-			profile[m.Identity] = Position{x, 0}
+			profile[m.Identity] = Position{X: x, Y: 0}
 		}
 	}
 	return profile, nil

@@ -7,6 +7,9 @@
   model names and using connector names to break identity ties.
 - Keep identity/matching in the Go backend; runtime.lua invokes the same backend
   on Hyprland events so GUI and runtime cannot disagree.
+- Store the optional primary flag on one monitor identity per profile. Expose
+  its current connector name as NIER_PRIMARY_MONITOR in Hyprland Lua after apply;
+  clear it when unset or on topology changes pending asynchronous application.
 - Never execute shell text derived from monitor metadata. Use argument arrays,
   escape generated Lua strings, and show dynamic QML text as Text.PlainText.
 - Save atomically, preserve other profiles, reject overlapping layouts and stale

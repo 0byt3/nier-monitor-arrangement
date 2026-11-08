@@ -14,6 +14,9 @@ case ${1:-open} in
   open)
     [[ -x $helper ]] || { echo "Missing backend: run bin/build first." >&2; exit 1; }
     export NIER_MONITOR_ARRANGEMENT_BACKEND=$helper
+    if quickshell ipc -p "$assets/shell.qml" call arrangement show >/dev/null 2>&1; then
+      exit 0
+    fi
     exec quickshell --no-duplicate -p "$assets/shell.qml"
     ;;
   snapshot|save|apply) exec "$helper" "$@" ;;

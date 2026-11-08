@@ -71,10 +71,17 @@ func ReadProfiles(ctx context.Context, path, lua string) (Profiles, string, erro
 		if key == "" || len(key) > 65536 || len(profile) == 0 || len(profile) > MaxMonitors {
 			return nil, "", errors.New("invalid profile key or monitor count")
 		}
+		primaryCount := 0
 		for id, p := range profile {
+			if p.Primary {
+				primaryCount++
+			}
 			if id == "" || len(id) > 4096 || p.X < -65536 || p.X > 65536 || p.Y < -65536 || p.Y > 65536 {
 				return nil, "", errors.New("invalid monitor identity or coordinates in profile")
 			}
+		}
+		if primaryCount > 1 {
+			return nil, "", errors.New("only one monitor can be primary in each profile")
 		}
 	}
 	return profiles, Digest(data), nil
@@ -97,7 +104,11 @@ func EncodeProfiles(profiles Profiles) []byte {
 		sort.Strings(ids)
 		for _, id := range ids {
 			p := profiles[key][id]
-			fmt.Fprintf(&out, "    [%s] = { x = %s, y = %s },\n", LuaQuote(id), strconv.Itoa(p.X), strconv.Itoa(p.Y))
+			primary := ""
+			if p.Primary {
+				primary = ", primary = true"
+			}
+			fmt.Fprintf(&out, "    [%s] = { x = %s, y = %s%s },\n", LuaQuote(id), strconv.Itoa(p.X), strconv.Itoa(p.Y), primary)
 		}
 		out.WriteString("  },\n")
 	}

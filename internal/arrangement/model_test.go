@@ -74,15 +74,15 @@ func TestKeyDelimitersCannotCollide(t *testing.T) {
 }
 func TestValidateAndStaleRequests(t *testing.T) {
 	m := prepared(t, sample())
-	p := Profile{"EXTERNAL": {0, -400}, "LAPTOP": {3072, 0}}
+	p := Profile{"EXTERNAL": {X: 0, Y: -400}, "LAPTOP": {X: 3072, Y: 0}}
 	if e := Validate(m, p); e != nil {
 		t.Fatal(e)
 	}
-	p["LAPTOP"] = Position{3000, 0}
+	p["LAPTOP"] = Position{X: 3000, Y: 0}
 	if Validate(m, p) == nil {
 		t.Fatal("accepted overlap")
 	}
-	p["LAPTOP"] = Position{65537, 0}
+	p["LAPTOP"] = Position{X: 65537, Y: 0}
 	if Validate(m, p) == nil {
 		t.Fatal("accepted out-of-bounds coordinate")
 	}
@@ -104,7 +104,7 @@ func TestStoreRoundtripAndSandbox(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "monitor-arrangement.lua")
 	key := "a\"\\\n<script>雪"
-	profiles := Profiles{key: {key: Position{-15, 42}}}
+	profiles := Profiles{key: {key: Position{X: -15, Y: 42}}}
 	if _, e := WriteProfiles(path, profiles); e != nil {
 		t.Fatal(e)
 	}
@@ -115,7 +115,7 @@ func TestStoreRoundtripAndSandbox(t *testing.T) {
 	if revision == "" || loaded[key][key] != profiles[key][key] {
 		t.Fatal(loaded, revision)
 	}
-	profiles["second"] = Profile{"monitor": Position{0, 0}}
+	profiles["second"] = Profile{"monitor": Position{X: 0, Y: 0}}
 	backup, e := WriteProfiles(path, profiles)
 	if e != nil || backup == "" {
 		t.Fatal(backup, e)

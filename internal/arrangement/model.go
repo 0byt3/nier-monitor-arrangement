@@ -34,14 +34,16 @@ type Monitor struct {
 }
 
 type Position struct {
-	X int `json:"x"`
-	Y int `json:"y"`
+	Primary bool `json:"primary,omitempty"`
+	X       int  `json:"x"`
+	Y       int  `json:"y"`
 }
 
 type Profile map[string]Position
 type Profiles map[string]Profile
 
 type Snapshot struct {
+	Primary     string    `json:"primary"`
 	Monitors    []Monitor `json:"monitors"`
 	Key         string    `json:"key"`
 	Fingerprint string    `json:"fingerprint"`
@@ -59,6 +61,7 @@ type Placement struct {
 }
 
 type SaveRequest struct {
+	Primary     string      `json:"primary"`
 	Fingerprint string      `json:"fingerprint"`
 	Revision    string      `json:"revision"`
 	Monitors    []Placement `json:"monitors"`
@@ -167,6 +170,15 @@ func Validate(monitors []Monitor, profile Profile) error {
 	if len(profile) != len(monitors) {
 		return errors.New("the arrangement does not include exactly the active monitor set")
 	}
+	primaryCount := 0
+	for _, p := range profile {
+		if p.Primary {
+			primaryCount++
+		}
+	}
+	if primaryCount > 1 {
+		return errors.New("only one monitor can be primary")
+	}
 	for i, m := range monitors {
 		p, ok := profile[m.Identity]
 		if !ok {
@@ -196,6 +208,11 @@ func FromRequest(monitors []Monitor, req SaveRequest) (Profile, error) {
 	for _, m := range monitors {
 		byName[m.Name] = m
 	}
+	if req.Primary != "" {
+		if _, ok := byName[req.Primary]; !ok {
+			return nil, fmt.Errorf("primary monitor %s is not connected", req.Primary)
+		}
+	}
 	result := Profile{}
 	for _, p := range req.Monitors {
 		m, ok := byName[p.Name]
@@ -205,7 +222,17 @@ func FromRequest(monitors []Monitor, req SaveRequest) (Profile, error) {
 		if _, exists := result[m.Identity]; exists {
 			return nil, errors.New("a monitor appears more than once")
 		}
-		result[m.Identity] = Position{p.X, p.Y}
+		result[m.Identity] = Position{X: p.X, Y: p.Y, Primary: m.Name == req.Primary}
 	}
 	return result, Validate(monitors, result)
+}
+
+// The selection follows the saved identity while Lua consumers see the current connector.
+func PrimaryName(monitors []Monitor, profile Profile) string {
+	for _, m := range monitors {
+		if profile[m.Identity].Primary {
+			return m.Name
+		}
+	}
+	return ""
 }

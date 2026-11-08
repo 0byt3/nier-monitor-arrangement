@@ -33,8 +33,38 @@ ShellRoot {
                 if (editor.overlapping || editor.positions()[0].y !== 0 || editor.positions()[2].x !== 4000) throw new Error("automatic row failed")
                 editor.align("bottom")
                 if (editor.positions()[0].y + 1440 !== editor.positions()[1].y + 2560) throw new Error("bottom alignment failed")
-                console.info("PASS: real pointer drag updates Y, automatic row and bottom alignment")
-            } catch (error) { console.error("FAIL: " + error) }
+                const selector = find(editor.contentItem, "primaryMonitorSelector")
+                if (!selector) throw new Error("missing primary selector")
+                editor.setPrimary("")
+                selector.forceActiveFocus()
+                events.keyClick(Qt.Key_Down,Qt.NoModifier,0)
+                if (editor.primaryMonitor !== "DP-1") throw new Error("keyboard primary selection failed")
+                editor.visible = false
+                editor.closed()
+                closeCheck.start()
+            } catch (error) { console.error("FAIL: " + error); Qt.quit() }
+        }
+    }
+    Timer {
+        id: closeCheck
+        interval: 150
+        onTriggered: {
+            if (!editor.visible || !editor.dirty || editor.pendingDiscard !== "quit") {
+                console.error("FAIL: dirty close hid the window or lost edits")
+                Qt.quit()
+                return
+            }
+            editor.visible = false
+            editor.showWindow()
+            reopenCheck.start()
+        }
+    }
+    Timer {
+        id: reopenCheck
+        interval: 150
+        onTriggered: {
+            if (!editor.visible || !editor.dirty) console.error("FAIL: reopen did not preserve the editor")
+            else console.info("PASS: real pointer drag, primary selection, dirty close recovery and hidden window reopening")
             Qt.quit()
         }
     }

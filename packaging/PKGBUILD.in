@@ -1,6 +1,6 @@
 pkgname=nier-monitor-arrangement
-pkgver=0.1.0
-pkgrel=4
+pkgver=0.2.0
+pkgrel=1
 pkgdesc='Standalone Quickshell display arrangement editor with saved Hyprland profiles'
 arch=('x86_64' 'aarch64')
 url='https://github.com/0byt3/nier-monitor-arrangement'

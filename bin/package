@@ -4,7 +4,7 @@ root=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 stage=$(mktemp -d)
 trap 'rm -rf -- "$stage"' EXIT
 name=nier-monitor-arrangement
-version=0.1.0
+version=0.2.0
 mkdir -p "$root/dist"
 tar --exclude=./.git --exclude=./build --exclude=./dist --exclude=./src --exclude=./pkg \
   --transform="s|^\.|$name-$version|" -czf "$stage/$name-$version.tar.gz" -C "$root" .

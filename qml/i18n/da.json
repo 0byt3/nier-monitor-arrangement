@@ -33,5 +33,8 @@
   "Snap edges": "Fastgør kanter",
   "Live layout reloaded.": "Aktuel placering genindlæst.",
   "Saved arrangement loaded for editing.": "Gemt placering indlæst til redigering.",
-  "Saved. Layout will apply when displays wake.": "Gemt. Placeringen anvendes, når skærmene vågner."
+  "Saved. Layout will apply when displays wake.": "Gemt. Placeringen anvendes, når skærmene vågner.",
+  "Primary monitor": "Primær skærm",
+  "Not set": "Ikke valgt",
+  "Primary monitor is not connected.": "Den primære skærm er ikke tilsluttet."
 }
